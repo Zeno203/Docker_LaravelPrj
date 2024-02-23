@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Web Server Service
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./WebMovie:/var/www
+      - ./nginx_conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+      - db
+
+  # Database Service
+  db:
+    image: mysql
+    container_name: mysql
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+#      - ./mysql/db-dump:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: webmovie
+      
+  # Application Service
+  app:
+    container_name: webmovie
+    build: 
+      dockerfile: Dockerfile
+    volumes:
+      - ./WebMovie:/var/www
+    ports:
+      - "9000:9000"
+    working_dir: /var/www
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "3400:80"
+    depends_on:
+      - db
